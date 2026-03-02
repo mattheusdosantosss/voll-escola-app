@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Users, 
   UserPlus, 
@@ -20,25 +20,25 @@ import {
   Clock,
   CheckCircle2,
   Plus,
-  X
+  X,
+  CalendarDays
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-
-interface Student {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  status: string;
-  plan: string;
-  created_at: string;
-}
+import ScheduleList from './components/ScheduleList';
+import ScheduleModal from './components/ScheduleModal';
+import FinancialList from './components/FinancialList';
+import { studentService } from './services/studentService';
+import { Aluno, Agendamento } from './types/database';
 
 export default function App() {
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<Aluno[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<Agendamento | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'alunos' | 'agenda' | 'financeiro'>('alunos');
+  const [refreshKey, setRefreshKey] = useState(0);
   
   const [newStudent, setNewStudent] = useState({
     name: '',
@@ -50,13 +50,13 @@ export default function App() {
 
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [refreshKey]);
 
   const fetchStudents = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/students');
-      const data = await response.json();
-      setStudents(data);
+      const data = await studentService.getStudents();
+      setStudents(data || []);
     } catch (error) {
       console.error('Error fetching students:', error);
     } finally {
@@ -67,19 +67,25 @@ export default function App() {
   const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/students', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newStudent)
-      });
-      if (response.ok) {
-        fetchStudents();
-        setIsModalOpen(false);
-        setNewStudent({ name: '', email: '', phone: '', plan: 'Mensal', status: 'Ativo' });
-      }
+      await studentService.createStudent(newStudent);
+      fetchStudents();
+      setIsModalOpen(false);
+      setNewStudent({ name: '', email: '', phone: '', plan: 'Mensal', status: 'Ativo' });
     } catch (error) {
       console.error('Error adding student:', error);
+      alert('Erro ao adicionar aluno.');
     }
+  };
+
+  const handleEditAppointment = (apt: Agendamento) => {
+    setEditingAppointment(apt);
+    setIsScheduleModalOpen(true);
+  };
+
+  const handleScheduleSuccess = () => {
+    setRefreshKey(prev => prev + 1);
+    setIsScheduleModalOpen(false);
+    setEditingAppointment(null);
   };
 
   const filteredStudents = students.filter(s => 
@@ -100,14 +106,30 @@ export default function App() {
         <div className="p-6">
           <div className="flex items-center gap-2 mb-8">
             <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold">V</div>
-            <h1 className="text-xl font-bold tracking-tight text-emerald-900">VOLL Candidate</h1>
+            <h1 className="text-xl font-bold tracking-tight text-emerald-900">VOLL Studio</h1>
           </div>
           
           <nav className="space-y-1">
-            <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" active />
-            <NavItem icon={<Users size={20} />} label="Alunos" />
-            <NavItem icon={<Calendar size={20} />} label="Agenda" disabled />
-            <NavItem icon={<TrendingUp size={20} />} label="Financeiro" disabled />
+            <NavItem 
+              icon={<LayoutDashboard size={20} />} 
+              label="Dashboard" 
+              active={activeTab === 'alunos'} 
+              onClick={() => setActiveTab('alunos')}
+            />
+            <NavItem 
+              icon={<CalendarDays size={20} />} 
+              label="Agenda" 
+              active={activeTab === 'agenda'} 
+              onClick={() => setActiveTab('agenda')}
+            />
+            <NavItem 
+              icon={<TrendingUp size={20} />} 
+              label="Financeiro" 
+              active={activeTab === 'financeiro'} 
+              onClick={() => setActiveTab('financeiro')}
+            />
+            <NavItem icon={<Users size={20} />} label="Alunos" active={activeTab === 'alunos'} onClick={() => setActiveTab('alunos')} />
+            <NavItem icon={<Calendar size={20} />} label="Calendário" disabled />
           </nav>
         </div>
         
@@ -120,12 +142,12 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="h-16 bg-white border-bottom border-slate-200 flex items-center justify-between px-8">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
-              placeholder="Buscar alunos..." 
+              placeholder="Buscar..." 
               className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -133,116 +155,146 @@ export default function App() {
           </div>
           
           <button 
-            onClick={() => setIsModalOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
+            onClick={() => {
+              if (activeTab === 'alunos') setIsModalOpen(true);
+              else if (activeTab === 'agenda') setIsScheduleModalOpen(true);
+            }}
+            className={`bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm ${activeTab === 'financeiro' ? 'hidden' : ''}`}
           >
-            <UserPlus size={18} />
-            Novo Aluno
+            {activeTab === 'alunos' ? (
+              <>
+                <UserPlus size={18} />
+                Novo Aluno
+              </>
+            ) : (
+              <>
+                <Calendar size={18} />
+                Novo Agendamento
+              </>
+            )}
           </button>
         </header>
 
         {/* Dashboard Content */}
         <div className="p-8 overflow-y-auto">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-800 mb-1">Bem-vindo ao VOLL</h2>
-            <p className="text-slate-500 text-sm">Gerencie seus alunos e acompanhe o crescimento do seu studio.</p>
+            <h2 className="text-2xl font-bold text-slate-800 mb-1">
+              {activeTab === 'alunos' ? 'Gestão de Alunos' : activeTab === 'agenda' ? 'Agenda de Aulas' : 'Gestão Financeira'}
+            </h2>
+            <p className="text-slate-500 text-sm">
+              {activeTab === 'alunos' 
+                ? 'Gerencie seus alunos e acompanhe o crescimento do seu studio.' 
+                : activeTab === 'agenda'
+                  ? 'Organize as aulas e agendamentos do seu studio.'
+                  : 'Controle suas receitas e despesas em um só lugar.'}
+            </p>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <StatCard 
-              label="Total de Alunos" 
-              value={stats.total} 
-              icon={<Users className="text-blue-600" />} 
-              trend="+12% este mês"
-            />
-            <StatCard 
-              label="Alunos Ativos" 
-              value={stats.active} 
-              icon={<CheckCircle2 className="text-emerald-600" />} 
-              trend="94% de retenção"
-            />
-            <StatCard 
-              label="Aulas Experimentais" 
-              value={stats.trial} 
-              icon={<Clock className="text-amber-600" />} 
-              trend="3 pendentes"
-            />
-          </div>
-
-          {/* Student List Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800">Lista de Alunos</h3>
-              <div className="flex gap-2">
-                <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium">Todos</span>
-                <span className="px-3 py-1 text-slate-400 rounded-full text-xs font-medium hover:bg-slate-50 cursor-pointer">Ativos</span>
-                <span className="px-3 py-1 text-slate-400 rounded-full text-xs font-medium hover:bg-slate-50 cursor-pointer">Inativos</span>
+          {activeTab === 'alunos' && (
+            <>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <StatCard 
+                  label="Total de Alunos" 
+                  value={stats.total} 
+                  icon={<Users className="text-blue-600" />} 
+                  trend="+12% este mês"
+                />
+                <StatCard 
+                  label="Alunos Ativos" 
+                  value={stats.active} 
+                  icon={<CheckCircle2 className="text-emerald-600" />} 
+                  trend="94% de retenção"
+                />
+                <StatCard 
+                  label="Aulas Experimentais" 
+                  value={stats.trial} 
+                  icon={<Clock className="text-amber-600" />} 
+                  trend="3 pendentes"
+                />
               </div>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider">
-                    <th className="px-6 py-4 font-semibold">Aluno</th>
-                    <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 font-semibold">Plano</th>
-                    <th className="px-6 py-4 font-semibold">Contato</th>
-                    <th className="px-6 py-4 font-semibold text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-slate-400">Carregando alunos...</td>
-                    </tr>
-                  ) : filteredStudents.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-slate-400">Nenhum aluno encontrado.</td>
-                    </tr>
-                  ) : (
-                    filteredStudents.map((student) => (
-                      <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
-                              {student.name.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-slate-800">{student.name}</p>
-                              <p className="text-xs text-slate-500">Desde {new Date(student.created_at).toLocaleDateString('pt-BR')}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <StatusBadge status={student.status} />
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-slate-600">{student.plan}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
-                              <Phone size={12} /> {student.phone}
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
-                              <Mail size={12} /> {student.email}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
-                            <MoreVertical size={18} />
-                          </button>
-                        </td>
+
+              {/* Student List Table */}
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-800">Lista de Alunos</h3>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-slate-50/50 text-slate-500 text-xs uppercase tracking-wider">
+                        <th className="px-6 py-4 font-semibold">Aluno</th>
+                        <th className="px-6 py-4 font-semibold">Status</th>
+                        <th className="px-6 py-4 font-semibold">Plano</th>
+                        <th className="px-6 py-4 font-semibold">Contato</th>
+                        <th className="px-6 py-4 font-semibold text-right">Ações</th>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {loading ? (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center text-slate-400">Carregando alunos...</td>
+                        </tr>
+                      ) : filteredStudents.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center text-slate-400">Nenhum aluno encontrado.</td>
+                        </tr>
+                      ) : (
+                        filteredStudents.map((student) => (
+                          <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                                  {student.name.charAt(0)}
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-slate-800">{student.name}</p>
+                                  <p className="text-xs text-slate-500">Desde {new Date(student.created_at).toLocaleDateString('pt-BR')}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <StatusBadge status={student.status} />
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-sm text-slate-600">{student.plan}</span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                  <Phone size={12} /> {student.phone}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                  <Mail size={12} /> {student.email}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
+                                <MoreVertical size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'agenda' && (
+            <ScheduleList 
+              onEdit={handleEditAppointment} 
+              refreshKey={refreshKey} 
+            />
+          )}
+
+          {activeTab === 'financeiro' && (
+            <FinancialList />
+          )}
         </div>
       </main>
 
@@ -353,13 +405,25 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
+
+      <ScheduleModal 
+        isOpen={isScheduleModalOpen}
+        onClose={() => {
+          setIsScheduleModalOpen(false);
+          setEditingAppointment(null);
+        }}
+        onSuccess={handleScheduleSuccess}
+        editingAppointment={editingAppointment}
+      />
     </div>
   );
 }
 
-function NavItem({ icon, label, active = false, disabled = false }: { icon: React.ReactNode, label: string, active?: boolean, disabled?: boolean }) {
+function NavItem({ icon, label, active = false, disabled = false, onClick }: { icon: React.ReactNode, label: string, active?: boolean, disabled?: boolean, onClick?: () => void }) {
   return (
-    <div className={`
+    <div 
+      onClick={!disabled ? onClick : undefined}
+      className={`
       flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all group
       ${active ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}
       ${disabled ? 'opacity-40 cursor-not-allowed grayscale' : ''}
