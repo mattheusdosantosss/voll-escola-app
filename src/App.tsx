@@ -49,10 +49,10 @@ export default function App() {
   const [refreshKey, setRefreshKey] = useState(0);
   
   const [newStudent, setNewStudent] = useState({
-    name: '',
+    nome: '',
     email: '',
-    phone: '',
-    plan: 'Mensal',
+    telefone: '',
+    plano: 'Mensal',
     status: 'Ativo'
   });
 
@@ -97,7 +97,7 @@ export default function App() {
   };
 
   const filteredStudents = students.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -281,10 +281,10 @@ export default function App() {
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
-                                  {student.name.charAt(0)}
+                                  {student.nome.charAt(0)}
                                 </div>
                                 <div>
-                                  <p className="font-semibold text-slate-800">{student.name}</p>
+                                  <p className="font-semibold text-slate-800">{student.nome}</p>
                                   <p className="text-xs text-slate-500">Desde {new Date(student.created_at).toLocaleDateString('pt-BR')}</p>
                                 </div>
                               </div>
@@ -293,12 +293,12 @@ export default function App() {
                               <StatusBadge status={student.status} />
                             </td>
                             <td className="px-6 py-4">
-                              <span className="text-sm text-slate-600">{student.plan}</span>
+                              <span className="text-sm text-slate-600">{student.plano}</span>
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
-                                  <Phone size={12} /> {student.phone}
+                                  <Phone size={12} /> {student.telefone}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                   <Mail size={12} /> {student.email}
@@ -365,8 +365,8 @@ export default function App() {
                     type="text" 
                     className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                     placeholder="Ex: João Silva"
-                    value={newStudent.name}
-                    onChange={e => setNewStudent({...newStudent, name: e.target.value})}
+                    value={newStudent.nome}
+                    onChange={e => setNewStudent({...newStudent, nome: e.target.value})}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -388,8 +388,8 @@ export default function App() {
                       type="tel" 
                       className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                       placeholder="(11) 99999-9999"
-                      value={newStudent.phone}
-                      onChange={e => setNewStudent({...newStudent, phone: e.target.value})}
+                      value={newStudent.telefone}
+                      onChange={e => setNewStudent({...newStudent, telefone: e.target.value})}
                     />
                   </div>
                 </div>
@@ -397,8 +397,8 @@ export default function App() {
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Plano</label>
                   <select 
                     className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                    value={newStudent.plan}
-                    onChange={e => setNewStudent({...newStudent, plan: e.target.value})}
+                    value={newStudent.plano}
+                    onChange={e => setNewStudent({...newStudent, plano: e.target.value})}
                   >
                     <option>Mensal</option>
                     <option>Trimestral</option>

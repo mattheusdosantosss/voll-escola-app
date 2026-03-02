@@ -199,7 +199,7 @@ export default function FinancialModal({ isOpen, onClose, onSuccess, editingLanc
                     >
                       <option value="">Nenhum aluno vinculado</option>
                       {students.map(student => (
-                        <option key={student.id} value={student.id}>{student.name}</option>
+                        <option key={student.id} value={student.id}>{student.nome}</option>
                       ))}
                     </select>
                   </div>

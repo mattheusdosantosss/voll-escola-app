@@ -120,7 +120,7 @@ export default function ScheduleList({ onEdit, refreshKey }: ScheduleListProps) 
             >
               <option value="">Todos os alunos</option>
               {students.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id}>{s.nome}</option>
               ))}
             </select>
           </div>
@@ -212,9 +212,9 @@ export default function ScheduleList({ onEdit, refreshKey }: ScheduleListProps) 
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
-                          {apt.aluno?.name.charAt(0)}
+                          {apt.aluno?.nome.charAt(0)}
                         </div>
-                        <span className="text-sm font-medium text-slate-700">{apt.aluno?.name}</span>
+                        <span className="text-sm font-medium text-slate-700">{apt.aluno?.nome}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">

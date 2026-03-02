@@ -6,7 +6,7 @@ export const studentService = {
     const { data, error } = await supabase
       .from('alunos')
       .select('*')
-      .order('name');
+      .order('nome');
 
     if (error) throw error;
     return data as Aluno[];

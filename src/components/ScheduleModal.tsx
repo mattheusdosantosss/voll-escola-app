@@ -84,7 +84,7 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
     setError(null);
     try {
       const description = await aiService.generateLessonDescription({
-        studentName: student.name,
+        studentName: student.nome,
         ...aiParams
       });
       setFormData(prev => ({ ...prev, descricao_aula: description }));

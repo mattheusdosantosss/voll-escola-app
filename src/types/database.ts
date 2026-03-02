@@ -4,11 +4,11 @@ export type FinancialStatus = 'pago' | 'pendente' | 'atrasado';
 
 export interface Aluno {
   id: string;
-  name: string;
+  nome: string;
   email: string;
-  phone: string;
+  telefone: string;
   status: string;
-  plan: string;
+  plano: string;
   created_at: string;
 }
 

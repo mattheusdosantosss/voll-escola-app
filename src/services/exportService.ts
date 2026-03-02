@@ -6,9 +6,9 @@ import { Aluno } from "../types/database";
 export const exportService = {
   exportStudentsToCSV(students: Aluno[]) {
     const data = students.map(s => ({
-      Nome: s.name,
+      Nome: s.nome,
       Email: s.email,
-      Telefone: s.phone,
+      Telefone: s.telefone,
       Status: s.status,
       "Data de Cadastro": new Date(s.created_at).toLocaleDateString('pt-BR')
     }));
@@ -36,9 +36,9 @@ export const exportService = {
     doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 30);
 
     const tableData = students.map(s => [
-      s.name,
+      s.nome,
       s.email,
-      s.phone,
+      s.telefone,
       s.status,
       new Date(s.created_at).toLocaleDateString('pt-BR')
     ]);

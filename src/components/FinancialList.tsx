@@ -165,7 +165,7 @@ export default function FinancialList() {
                     <td className="px-6 py-4">
                       <div>
                         <p className="font-semibold text-slate-800">{item.descricao}</p>
-                        {item.aluno && <p className="text-xs text-slate-500">Aluno: {item.aluno.name}</p>}
+                        {item.aluno && <p className="text-xs text-slate-500">Aluno: {item.aluno.nome}</p>}
                       </div>
                     </td>
                     <td className="px-6 py-4">
