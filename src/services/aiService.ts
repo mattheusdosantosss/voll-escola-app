@@ -1,6 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getAIClient = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("A chave de API do Gemini (VITE_GEMINI_API_KEY) não foi configurada.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 export const aiService = {
   async generateLessonDescription(params: {
@@ -25,14 +31,15 @@ export const aiService = {
     Seja conciso mas profissional. Retorne apenas o texto da descrição.`;
 
     try {
+      const ai = getAIClient();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: prompt,
       });
       return response.text;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating lesson description:", error);
-      throw new Error("Falha ao gerar descrição da aula com IA.");
+      throw new Error(error.message || "Falha ao gerar descrição da aula com IA.");
     }
   },
 
@@ -52,6 +59,7 @@ export const aiService = {
     - Retorne as 3 variações em um formato JSON: { "variations": ["msg1", "msg2", "msg3"] }`;
 
     try {
+      const ai = getAIClient();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: prompt,
@@ -62,9 +70,9 @@ export const aiService = {
       
       const result = JSON.parse(response.text);
       return result.variations as string[];
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating WhatsApp messages:", error);
-      throw new Error("Falha ao gerar mensagens de WhatsApp com IA.");
+      throw new Error(error.message || "Falha ao gerar mensagens de WhatsApp com IA.");
     }
   }
 };
