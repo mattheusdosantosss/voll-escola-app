@@ -21,19 +21,27 @@ import {
   CheckCircle2,
   Plus,
   X,
-  CalendarDays
+  CalendarDays,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  MessageSquare,
+  Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import ScheduleList from './components/ScheduleList';
 import ScheduleModal from './components/ScheduleModal';
 import FinancialList from './components/FinancialList';
+import WhatsAppGenerator from './components/WhatsAppGenerator';
 import { studentService } from './services/studentService';
+import { exportService } from './services/exportService';
 import { Aluno, Agendamento } from './types/database';
 
 export default function App() {
   const [students, setStudents] = useState<Aluno[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Agendamento | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -143,15 +151,25 @@ export default function App() {
       <main className="flex-1 flex flex-col">
         {/* Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
-          <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Buscar..." 
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="flex items-center gap-4">
+            <div className="relative w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Buscar..." 
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <button 
+              onClick={() => setIsWhatsAppModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold hover:bg-emerald-100 transition-all border border-emerald-100"
+            >
+              <MessageSquare size={14} />
+              WhatsApp IA
+            </button>
           </div>
           
           <button 
@@ -218,6 +236,23 @@ export default function App() {
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                   <h3 className="font-bold text-slate-800">Lista de Alunos</h3>
+                  
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => exportService.exportStudentsToCSV(students)}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all border border-slate-200"
+                    >
+                      <FileSpreadsheet size={14} />
+                      CSV
+                    </button>
+                    <button 
+                      onClick={() => exportService.exportStudentsToPDF(students)}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all border border-slate-200"
+                    >
+                      <FileText size={14} />
+                      PDF
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="overflow-x-auto">
@@ -414,6 +449,11 @@ export default function App() {
         }}
         onSuccess={handleScheduleSuccess}
         editingAppointment={editingAppointment}
+      />
+
+      <WhatsAppGenerator 
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
       />
     </div>
   );

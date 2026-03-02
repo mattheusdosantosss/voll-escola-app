@@ -19,6 +19,7 @@ export interface Agendamento {
   horario_inicio: string; // HH:mm
   horario_fim: string; // HH:mm
   observacoes?: string;
+  descricao_aula?: string;
   status: AppointmentStatus;
   created_at: string;
   updated_at: string;
@@ -61,6 +62,7 @@ export interface CreateAgendamentoDTO {
   horario_inicio: string;
   horario_fim: string;
   observacoes?: string;
+  descricao_aula?: string;
   status?: AppointmentStatus;
 }
 
