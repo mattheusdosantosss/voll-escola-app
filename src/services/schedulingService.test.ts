@@ -18,10 +18,10 @@ export const runSchedulingTests = async () => {
   try {
     console.log('Teste 1: Validar horário_fim <= horário_inicio');
     await schedulingService.createAppointment({
-      aluno_id: testStudentId,
-      data_aula: testDate,
-      horario_inicio: '10:00',
-      horario_fim: '09:00',
+      student_id: testStudentId,
+      date_class: testDate,
+      hour_start: '10:00',
+      hour_end: '09:00',
       status: 'agendado'
     });
     console.error('❌ Teste 1 falhou: Deveria ter lançado erro de validação.');

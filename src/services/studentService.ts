@@ -6,7 +6,7 @@ export const studentService = {
     const { data, error } = await supabase
       .from('alunos')
       .select('*')
-      .order('nome');
+      .order('name');
 
     if (error) throw error;
     return data as Aluno[];
@@ -23,7 +23,7 @@ export const studentService = {
     return data as Aluno;
   },
 
-  async createStudent(student: Omit<Aluno, 'id' | 'created_at'>) {
+  async createStudent(student: Omit<Aluno, 'id' | 'created_at' | 'updated_at'>) {
     const { data, error } = await supabase
       .from('alunos')
       .insert([student])

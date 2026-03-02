@@ -4,22 +4,21 @@ export type FinancialStatus = 'pago' | 'pendente' | 'atrasado';
 
 export interface Aluno {
   id: string;
-  nome: string;
+  name: string;
   email: string;
-  telefone: string;
+  phone: string;
   status: string;
-  plano: string;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Agendamento {
   id: string;
-  aluno_id: string;
-  data_aula: string; // YYYY-MM-DD
-  horario_inicio: string; // HH:mm
-  horario_fim: string; // HH:mm
-  observacoes?: string;
-  descricao_aula?: string;
+  student_id: string;
+  date_class: string; // YYYY-MM-DD
+  hour_start: string; // HH:mm
+  hour_end: string; // HH:mm
+  description?: string;
   status: AppointmentStatus;
   created_at: string;
   updated_at: string;
@@ -29,50 +28,48 @@ export interface Agendamento {
 
 export interface LancamentoFinanceiro {
   id: string;
-  descricao: string;
-  valor: number;
-  data_vencimento: string;
-  data_pagamento?: string;
-  tipo: FinancialType;
+  description: string;
+  value: number;
+  maturity: string;
+  payment_date?: string;
+  type: FinancialType;
   status: FinancialStatus;
-  categoria?: string;
-  aluno_id?: string;
+  student_id?: string;
   created_at: string;
+  updated_at: string;
   // Joined data
   aluno?: Aluno;
 }
 
 export interface AppointmentFilters {
-  aluno_id?: string;
+  student_id?: string;
   data_inicio?: string;
   data_fim?: string;
   status?: AppointmentStatus;
 }
 
 export interface FinancialFilters {
-  tipo?: FinancialType;
+  type?: FinancialType;
   status?: FinancialStatus;
   data_inicio?: string;
   data_fim?: string;
 }
 
 export interface CreateAgendamentoDTO {
-  aluno_id: string;
-  data_aula: string;
-  horario_inicio: string;
-  horario_fim: string;
-  observacoes?: string;
-  descricao_aula?: string;
+  student_id: string;
+  date_class: string;
+  hour_start: string;
+  hour_end: string;
+  description?: string;
   status?: AppointmentStatus;
 }
 
 export interface CreateLancamentoDTO {
-  descricao: string;
-  valor: number;
-  data_vencimento: string;
-  data_pagamento?: string;
-  tipo: FinancialType;
+  description: string;
+  value: number;
+  maturity: string;
+  payment_date?: string;
+  type: FinancialType;
   status: FinancialStatus;
-  categoria?: string;
-  aluno_id?: string;
+  student_id?: string;
 }

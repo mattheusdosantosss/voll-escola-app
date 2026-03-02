@@ -105,8 +105,8 @@ export default function FinancialList() {
         <div className="flex gap-2">
           <select 
             className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none"
-            value={filters.tipo || ''}
-            onChange={(e) => setFilters({...filters, tipo: e.target.value as FinancialType || undefined})}
+            value={filters.type || ''}
+            onChange={(e) => setFilters({...filters, type: e.target.value as FinancialType || undefined})}
           >
             <option value="">Todos os Tipos</option>
             <option value="receita">Receita</option>
@@ -164,23 +164,23 @@ export default function FinancialList() {
                   <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="font-semibold text-slate-800">{item.descricao}</p>
-                        {item.aluno && <p className="text-xs text-slate-500">Aluno: {item.aluno.nome}</p>}
+                        <p className="font-semibold text-slate-800">{item.description}</p>
+                        {item.aluno && <p className="text-xs text-slate-500">Aluno: {item.aluno.name}</p>}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        item.tipo === 'receita' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                        item.type === 'receita' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
                       }`}>
-                        {item.tipo === 'receita' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                        {item.tipo === 'receita' ? 'Receita' : 'Despesa'}
+                        {item.type === 'receita' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                        {item.type === 'receita' ? 'Receita' : 'Despesa'}
                       </span>
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-700">
-                      {formatCurrency(item.valor)}
+                      {formatCurrency(item.value)}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600">
-                      {new Date(item.data_vencimento).toLocaleDateString('pt-BR')}
+                      {new Date(item.maturity).toLocaleDateString('pt-BR')}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${

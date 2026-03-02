@@ -33,7 +33,7 @@ export default function ScheduleList({ onEdit, refreshKey }: ScheduleListProps) 
   const pageSize = 10;
 
   const [filters, setFilters] = useState<AppointmentFilters>({
-    aluno_id: '',
+    student_id: '',
     data_inicio: '',
     data_fim: '',
     status: undefined
@@ -115,12 +115,12 @@ export default function ScheduleList({ onEdit, refreshKey }: ScheduleListProps) 
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Aluno</label>
             <select 
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              value={filters.aluno_id || ''}
-              onChange={e => setFilters({...filters, aluno_id: e.target.value})}
+              value={filters.student_id || ''}
+              onChange={e => setFilters({...filters, student_id: e.target.value})}
             >
               <option value="">Todos os alunos</option>
               {students.map(s => (
-                <option key={s.id} value={s.id}>{s.nome}</option>
+                <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
           </div>
@@ -202,19 +202,19 @@ export default function ScheduleList({ onEdit, refreshKey }: ScheduleListProps) 
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="font-semibold text-slate-800">
-                          {new Date(apt.data_aula + 'T00:00:00').toLocaleDateString('pt-BR')}
+                          {new Date(apt.date_class + 'T00:00:00').toLocaleDateString('pt-BR')}
                         </span>
                         <span className="text-xs text-slate-500 flex items-center gap-1">
-                          <Clock size={12} /> {apt.horario_inicio.slice(0, 5)} - {apt.horario_fim.slice(0, 5)}
+                          <Clock size={12} /> {apt.hour_start.slice(0, 5)} - {apt.hour_end.slice(0, 5)}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
-                          {apt.aluno?.nome.charAt(0)}
+                          {apt.aluno?.name.charAt(0)}
                         </div>
-                        <span className="text-sm font-medium text-slate-700">{apt.aluno?.nome}</span>
+                        <span className="text-sm font-medium text-slate-700">{apt.aluno?.name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -223,8 +223,8 @@ export default function ScheduleList({ onEdit, refreshKey }: ScheduleListProps) 
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-xs text-slate-500 max-w-xs truncate" title={apt.observacoes}>
-                        {apt.observacoes || '-'}
+                      <p className="text-xs text-slate-500 max-w-xs truncate" title={apt.description}>
+                        {apt.description || '-'}
                       </p>
                     </td>
                     <td className="px-6 py-4 text-right">

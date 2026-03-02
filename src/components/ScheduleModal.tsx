@@ -28,12 +28,11 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
   });
 
   const [formData, setFormData] = useState<CreateAgendamentoDTO>({
-    aluno_id: '',
-    data_aula: new Date().toISOString().split('T')[0],
-    horario_inicio: '08:00',
-    horario_fim: '09:00',
-    observacoes: '',
-    descricao_aula: '',
+    student_id: '',
+    date_class: new Date().toISOString().split('T')[0],
+    hour_start: '08:00',
+    hour_end: '09:00',
+    description: '',
     status: 'agendado'
   });
 
@@ -42,22 +41,20 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
       fetchStudents();
       if (editingAppointment) {
         setFormData({
-          aluno_id: editingAppointment.aluno_id,
-          data_aula: editingAppointment.data_aula,
-          horario_inicio: editingAppointment.horario_inicio.slice(0, 5),
-          horario_fim: editingAppointment.horario_fim.slice(0, 5),
-          observacoes: editingAppointment.observacoes || '',
-          descricao_aula: editingAppointment.descricao_aula || '',
+          student_id: editingAppointment.student_id,
+          date_class: editingAppointment.date_class,
+          hour_start: editingAppointment.hour_start.slice(0, 5),
+          hour_end: editingAppointment.hour_end.slice(0, 5),
+          description: editingAppointment.description || '',
           status: editingAppointment.status
         });
       } else {
         setFormData({
-          aluno_id: '',
-          data_aula: new Date().toISOString().split('T')[0],
-          horario_inicio: '08:00',
-          horario_fim: '09:00',
-          observacoes: '',
-          descricao_aula: '',
+          student_id: '',
+          date_class: new Date().toISOString().split('T')[0],
+          hour_start: '08:00',
+          hour_end: '09:00',
+          description: '',
           status: 'agendado'
         });
       }
@@ -74,7 +71,7 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
   };
 
   const handleGenerateAI = async () => {
-    const student = students.find(s => s.id === formData.aluno_id);
+    const student = students.find(s => s.id === formData.student_id);
     if (!student) {
       setError('Selecione um aluno primeiro para usar a IA.');
       return;
@@ -84,10 +81,10 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
     setError(null);
     try {
       const description = await aiService.generateLessonDescription({
-        studentName: student.nome,
+        studentName: student.name,
         ...aiParams
       });
-      setFormData(prev => ({ ...prev, descricao_aula: description }));
+      setFormData(prev => ({ ...prev, description: description }));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -157,8 +154,8 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
                     <select 
                       required
                       className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                      value={formData.aluno_id}
-                      onChange={e => setFormData({...formData, aluno_id: e.target.value})}
+                      value={formData.student_id}
+                      onChange={e => setFormData({...formData, student_id: e.target.value})}
                     >
                       <option value="">Selecione um aluno</option>
                       {students.map(s => (
@@ -177,8 +174,8 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
                         required
                         type="date" 
                         className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                        value={formData.data_aula}
-                        onChange={e => setFormData({...formData, data_aula: e.target.value})}
+                        value={formData.date_class}
+                        onChange={e => setFormData({...formData, date_class: e.target.value})}
                       />
                     </div>
                   </div>
@@ -205,8 +202,8 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
                         required
                         type="time" 
                         className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                        value={formData.horario_inicio}
-                        onChange={e => setFormData({...formData, horario_inicio: e.target.value})}
+                        value={formData.hour_start}
+                        onChange={e => setFormData({...formData, hour_start: e.target.value})}
                       />
                     </div>
                   </div>
@@ -218,8 +215,8 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
                         required
                         type="time" 
                         className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                        value={formData.horario_fim}
-                        onChange={e => setFormData({...formData, horario_fim: e.target.value})}
+                        value={formData.hour_end}
+                        onChange={e => setFormData({...formData, hour_end: e.target.value})}
                       />
                     </div>
                   </div>
@@ -230,23 +227,10 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
                   <div className="relative">
                     <FileText size={16} className="absolute left-3 top-3 text-slate-400" />
                     <textarea 
-                      className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 h-32 resize-none"
+                      className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 h-48 resize-none"
                       placeholder="A descrição detalhada da aula aparecerá aqui..."
-                      value={formData.descricao_aula}
-                      onChange={e => setFormData({...formData, descricao_aula: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Observações Internas</label>
-                  <div className="relative">
-                    <FileText size={16} className="absolute left-3 top-3 text-slate-400" />
-                    <textarea 
-                      className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 h-20 resize-none"
-                      placeholder="Alguma observação importante?"
-                      value={formData.observacoes}
-                      onChange={e => setFormData({...formData, observacoes: e.target.value})}
+                      value={formData.description}
+                      onChange={e => setFormData({...formData, description: e.target.value})}
                     />
                   </div>
                 </div>
@@ -321,7 +305,7 @@ export default function ScheduleModal({ isOpen, onClose, onSuccess, editingAppoi
                     <button 
                       type="button"
                       onClick={handleGenerateAI}
-                      disabled={aiLoading || !formData.aluno_id}
+                      disabled={aiLoading || !formData.student_id}
                       className="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {aiLoading ? (

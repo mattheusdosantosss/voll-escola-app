@@ -7,37 +7,37 @@ export const schedulingService = {
       .from('agendamentos')
       .select('*, aluno:alunos(*)', { count: 'exact' });
 
-    if (filters.aluno_id) {
-      query = query.eq('aluno_id', filters.aluno_id);
+    if (filters.student_id) {
+      query = query.eq('student_id', filters.student_id);
     }
     if (filters.status) {
       query = query.eq('status', filters.status);
     }
     if (filters.data_inicio) {
-      query = query.gte('data_aula', filters.data_inicio);
+      query = query.gte('date_class', filters.data_inicio);
     }
     if (filters.data_fim) {
-      query = query.lte('data_aula', filters.data_fim);
+      query = query.lte('date_class', filters.data_fim);
     }
 
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
     const { data, error, count } = await query
-      .order('data_aula', { ascending: true })
-      .order('horario_inicio', { ascending: true })
+      .order('date_class', { ascending: true })
+      .order('hour_start', { ascending: true })
       .range(from, to);
 
     if (error) throw error;
     return { data: data as Agendamento[], count };
   },
 
-  async checkConflict(aluno_id: string, data_aula: string, inicio: string, fim: string, excludeId?: string) {
+  async checkConflict(student_id: string, date_class: string, inicio: string, fim: string, excludeId?: string) {
     let query = supabase
       .from('agendamentos')
       .select('id')
-      .eq('aluno_id', aluno_id)
-      .eq('data_aula', data_aula)
+      .eq('student_id', student_id)
+      .eq('date_class', date_class)
       .neq('status', 'cancelado');
 
     if (excludeId) {

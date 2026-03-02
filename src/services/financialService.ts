@@ -4,27 +4,27 @@ import { LancamentoFinanceiro, FinancialFilters, CreateLancamentoDTO } from '../
 export const financialService = {
   async getLancamentos(filters: FinancialFilters, page: number = 1, pageSize: number = 10) {
     let query = supabase
-      .from('financeiro_lancamentos')
+      .from('financeiro')
       .select('*, aluno:alunos(*)', { count: 'exact' });
 
-    if (filters.tipo) {
-      query = query.eq('tipo', filters.tipo);
+    if (filters.type) {
+      query = query.eq('type', filters.type);
     }
     if (filters.status) {
       query = query.eq('status', filters.status);
     }
     if (filters.data_inicio) {
-      query = query.gte('data_vencimento', filters.data_inicio);
+      query = query.gte('maturity', filters.data_inicio);
     }
     if (filters.data_fim) {
-      query = query.lte('data_vencimento', filters.data_fim);
+      query = query.lte('maturity', filters.data_fim);
     }
 
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
     const { data, error, count } = await query
-      .order('data_vencimento', { ascending: false })
+      .order('maturity', { ascending: false })
       .range(from, to);
 
     if (error) throw error;
@@ -33,8 +33,8 @@ export const financialService = {
 
   async getTotals() {
     const { data, error } = await supabase
-      .from('financeiro_lancamentos')
-      .select('tipo, valor, status');
+      .from('financeiro')
+      .select('type, value, status');
 
     if (error) throw error;
 
@@ -45,14 +45,14 @@ export const financialService = {
     };
 
     data.forEach((item) => {
-      if (item.tipo === 'receita') {
+      if (item.type === 'receita') {
         if (item.status === 'pago') {
-          totals.totalAReceber += item.valor;
+          totals.totalAReceber += item.value;
         } else {
-          totals.totalPendente += item.valor;
+          totals.totalPendente += item.value;
         }
-      } else if (item.tipo === 'despesa') {
-        totals.totalAPagar += item.valor;
+      } else if (item.type === 'despesa') {
+        totals.totalAPagar += item.value;
       }
     });
 
@@ -61,7 +61,7 @@ export const financialService = {
 
   async createLancamento(lancamento: CreateLancamentoDTO) {
     const { data, error } = await supabase
-      .from('financeiro_lancamentos')
+      .from('financeiro')
       .insert([lancamento])
       .select('*, aluno:alunos(*)')
       .single();
@@ -72,7 +72,7 @@ export const financialService = {
 
   async updateLancamento(id: string, updates: Partial<LancamentoFinanceiro>) {
     const { data, error } = await supabase
-      .from('financeiro_lancamentos')
+      .from('financeiro')
       .update(updates)
       .eq('id', id)
       .select('*, aluno:alunos(*)')
@@ -84,7 +84,7 @@ export const financialService = {
 
   async deleteLancamento(id: string) {
     const { error } = await supabase
-      .from('financeiro_lancamentos')
+      .from('financeiro')
       .delete()
       .eq('id', id);
 

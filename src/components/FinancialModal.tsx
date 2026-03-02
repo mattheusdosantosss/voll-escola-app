@@ -18,13 +18,12 @@ export default function FinancialModal({ isOpen, onClose, onSuccess, editingLanc
   const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState<CreateLancamentoDTO>({
-    descricao: '',
-    valor: 0,
-    data_vencimento: new Date().toISOString().split('T')[0],
-    tipo: 'receita',
+    description: '',
+    value: 0,
+    maturity: new Date().toISOString().split('T')[0],
+    type: 'receita',
     status: 'pendente',
-    categoria: '',
-    aluno_id: undefined
+    student_id: undefined
   });
 
   useEffect(() => {
@@ -32,24 +31,22 @@ export default function FinancialModal({ isOpen, onClose, onSuccess, editingLanc
       fetchStudents();
       if (editingLancamento) {
         setFormData({
-          descricao: editingLancamento.descricao,
-          valor: editingLancamento.valor,
-          data_vencimento: editingLancamento.data_vencimento,
-          data_pagamento: editingLancamento.data_pagamento,
-          tipo: editingLancamento.tipo,
+          description: editingLancamento.description,
+          value: editingLancamento.value,
+          maturity: editingLancamento.maturity,
+          payment_date: editingLancamento.payment_date,
+          type: editingLancamento.type,
           status: editingLancamento.status,
-          categoria: editingLancamento.categoria || '',
-          aluno_id: editingLancamento.aluno_id || undefined
+          student_id: editingLancamento.student_id || undefined
         });
       } else {
         setFormData({
-          descricao: '',
-          valor: 0,
-          data_vencimento: new Date().toISOString().split('T')[0],
-          tipo: 'receita',
+          description: '',
+          value: 0,
+          maturity: new Date().toISOString().split('T')[0],
+          type: 'receita',
           status: 'pendente',
-          categoria: '',
-          aluno_id: undefined
+          student_id: undefined
         });
       }
     }
@@ -127,8 +124,8 @@ export default function FinancialModal({ isOpen, onClose, onSuccess, editingLanc
                       type="text" 
                       className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                       placeholder="Ex: Mensalidade João Silva"
-                      value={formData.descricao}
-                      onChange={e => setFormData({...formData, descricao: e.target.value})}
+                      value={formData.description}
+                      onChange={e => setFormData({...formData, description: e.target.value})}
                     />
                   </div>
                 </div>
@@ -137,8 +134,8 @@ export default function FinancialModal({ isOpen, onClose, onSuccess, editingLanc
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo</label>
                   <select 
                     className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                    value={formData.tipo}
-                    onChange={e => setFormData({...formData, tipo: e.target.value as FinancialType})}
+                    value={formData.type}
+                    onChange={e => setFormData({...formData, type: e.target.value as FinancialType})}
                   >
                     <option value="receita">Receita</option>
                     <option value="despesa">Despesa</option>
@@ -155,8 +152,8 @@ export default function FinancialModal({ isOpen, onClose, onSuccess, editingLanc
                       step="0.01"
                       className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                       placeholder="0,00"
-                      value={formData.valor}
-                      onChange={e => setFormData({...formData, valor: parseFloat(e.target.value)})}
+                      value={formData.value}
+                      onChange={e => setFormData({...formData, value: parseFloat(e.target.value)})}
                     />
                   </div>
                 </div>
@@ -169,8 +166,8 @@ export default function FinancialModal({ isOpen, onClose, onSuccess, editingLanc
                       required
                       type="date" 
                       className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                      value={formData.data_vencimento}
-                      onChange={e => setFormData({...formData, data_vencimento: e.target.value})}
+                      value={formData.maturity}
+                      onChange={e => setFormData({...formData, maturity: e.target.value})}
                     />
                   </div>
                 </div>
@@ -194,28 +191,14 @@ export default function FinancialModal({ isOpen, onClose, onSuccess, editingLanc
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <select 
                       className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                      value={formData.aluno_id || ''}
-                      onChange={e => setFormData({...formData, aluno_id: e.target.value || undefined})}
+                      value={formData.student_id || ''}
+                      onChange={e => setFormData({...formData, student_id: e.target.value || undefined})}
                     >
                       <option value="">Nenhum aluno vinculado</option>
                       {students.map(student => (
-                        <option key={student.id} value={student.id}>{student.nome}</option>
+                        <option key={student.id} value={student.id}>{student.name}</option>
                       ))}
                     </select>
-                  </div>
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Categoria</label>
-                  <div className="relative">
-                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                    <input 
-                      type="text" 
-                      className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                      placeholder="Ex: Mensalidade, Aluguel, Equipamento"
-                      value={formData.categoria}
-                      onChange={e => setFormData({...formData, categoria: e.target.value})}
-                    />
                   </div>
                 </div>
               </div>
