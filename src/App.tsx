@@ -64,8 +64,9 @@ export default function App() {
     try {
       const data = await studentService.getStudents();
       setStudents(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching students:', error);
+      alert(`Erro ao buscar alunos: ${error?.message || 'ver console para detalhes.'}`);
     } finally {
       setLoading(false);
     }
@@ -78,9 +79,9 @@ export default function App() {
       fetchStudents();
       setIsModalOpen(false);
       setNewStudent({ name: '', email: '', phone: '', status: 'Ativo' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding student:', error);
-      alert('Erro ao adicionar aluno.');
+      alert(`Erro ao adicionar aluno: ${error?.message || 'ver console para detalhes.'}`);
     }
   };
 
