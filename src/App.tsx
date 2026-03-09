@@ -47,6 +47,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'alunos' | 'agenda' | 'financeiro'>('alunos');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   
   const [newStudent, setNewStudent] = useState({
     name: '',
@@ -75,13 +76,42 @@ export default function App() {
   const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await studentService.createStudent(newStudent);
+      if (editingStudentId) {
+        await studentService.updateStudent(editingStudentId, newStudent);
+      } else {
+        await studentService.createStudent(newStudent);
+      }
       fetchStudents();
       setIsModalOpen(false);
+      setEditingStudentId(null);
       setNewStudent({ name: '', email: '', phone: '', status: 'Ativo' });
     } catch (error: any) {
       console.error('Error adding student:', error);
-      alert(`Erro ao adicionar aluno: ${error?.message || 'ver console para detalhes.'}`);
+      alert(`Erro ao salvar aluno: ${error?.message || 'ver console para detalhes.'}`);
+    }
+  };
+
+  const handleStartEditStudent = (student: Aluno) => {
+    setEditingStudentId(student.id);
+    setNewStudent({
+      name: student.name,
+      email: student.email,
+      phone: student.phone,
+      status: student.status || 'Ativo',
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteStudent = async (id: string) => {
+    const confirmed = window.confirm('Tem certeza que deseja excluir este aluno? Esta ação não pode ser desfeita.');
+    if (!confirmed) return;
+
+    try {
+      await studentService.deleteStudent(id);
+      fetchStudents();
+    } catch (error: any) {
+      console.error('Error deleting student:', error);
+      alert(`Erro ao excluir aluno: ${error?.message || 'ver console para detalhes.'}`);
     }
   };
 
@@ -302,9 +332,22 @@ export default function App() {
                               </div>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
-                                <MoreVertical size={18} />
-                              </button>
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditStudent(student)}
+                                  className="px-2 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-100 transition-colors"
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteStudent(student.id)}
+                                  className="px-2 py-1 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg border border-red-100 transition-colors"
+                                >
+                                  Excluir
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
